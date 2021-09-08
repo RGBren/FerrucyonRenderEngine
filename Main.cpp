@@ -28,13 +28,19 @@ GLuint indices[] =
 
 int main()
 {
+	//Initializes GLFW
 	glfwInit();
-
+	
+	//Tells GLFW that we are using OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	//Tells GLFW we should be using the core profile of OpenGL.
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	//Registering the window.
+
 	GLFWwindow* window = glfwCreateWindow(800, 800, "PixelFox Renderer", NULL, NULL);
+	//Terminates GLFW in the case that creating the window has failed.
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -43,14 +49,18 @@ int main()
 	}
 	glfwMakeContextCurrent(window);
 
+	GLFWimage images[1];
+	images[0].pixels = stbi_load("Ferrucyon_30x30.png", &images[0].width, &images[0].height, 0, 4);
+	glfwSetWindowIcon(window, 1, images);
+	stbi_image_free(images[0].pixels);
+	
 	gladLoadGL();
 	glViewport(0, 0, 800, 800);
 
-
-
 	Shader shaderProgram("default.vert", "default.frag");
 
-
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	VAO VAO1;
 	VAO1.Bind();
@@ -58,7 +68,6 @@ int main()
 	VBO VBO1(vertices, sizeof(vertices));
 	EBO EBO1(indices, sizeof(indices));
 
-	// Links VBO to VAO
 	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
 	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
@@ -68,13 +77,12 @@ int main()
 
 	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
 
-
 	Texture ferrucyon("Ferrucyon_30x30.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 	ferrucyon.texUnit(shaderProgram, "tex0", 0);
 
 	while (!glfwWindowShouldClose(window))
 	{
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		shaderProgram.Activate();
 		glUniform1f(uniID, 0.5f);
@@ -84,7 +92,6 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
 
 
 	VAO1.Delete();
